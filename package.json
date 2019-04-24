@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon serverExpress.js",
-    "nd": "node server.js",
-    "ndm": "nodemon server.js",
+    "nd": "node serverExpress.js",
+    "ndm": "nodemon serverExpress.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
