@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Principal</h1>
+    <button onclick="mostrarAlumnos()" >Mostrar alumnos</button>
+    <p id="msg"></p>
+    <script>
+        function mostrarAlumnos(){
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', 'http://localhost:3000/alumnos');
+            xhr.send();
+            xhr.onload = function(){
+               if(xhr.status != 200){
+                 msg.innerHTML = "Error: al cargar alumnos";
+               }else{
+                  console.log(xhr.response);
+                  let alumnos = JSON.parse(xhr.response);
+                  console.log(alumnos); 
+                  alumnos.forEach(alu => {
+                    msg.innerHTML += "<br>id: "+ alu.id+"<br>"+
+                                     "nombre:"+alu.nombre+"<br>"+
+                                     "edad:"+alu.edad+"<br>";
+                  });
+                  
+                    
+
+               } 
+            }
+
+        }
+    </script>
+
+</body>
+</html>
