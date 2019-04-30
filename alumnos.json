@@ -1,17 +1,1 @@
-[
-    {
-        "id":23,
-        "nombre":"Randy Lopez",
-        "edad":25
-    },
-    {
-        "id":32,
-        "nombre":"Dale Horton",
-        "edad":28
-    },
-    {
-        "id":45,
-        "nombre":"Pauline Phillips",
-        "edad":37
-    }
-]
+[{"id":23,"nombre":"Randy Lopez","edad":25},{"id":32,"nombre":"Dale Horton","edad":28},{"id":45,"nombre":"Pauline Phillips","edad":37},{"id":48,"nombre":"Laura G","edad":26}]
