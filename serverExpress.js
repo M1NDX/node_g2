@@ -18,6 +18,7 @@ let corsOptions = {
 let jsonParser = bodyParser.json();
 app.use(jsonParser);
 app.use(cors(corsOptions));
+app.use('/api/alumno/:id',validarId);
 
 app.use(express.static(__dirname + '/public'))
 
@@ -69,12 +70,32 @@ app.route('/api/alumno/:id')
         let id = req.params.id;
         let body = req.body;
         if(updateAlumno(id,body)){
-            res.send(alumnos[pos]);
+            res.send();
         } else{
             res.status(400).send({error:"Faltan datos o id incorrecto"})
         }
     })
     .patch((req,res)=>{
+        let id = req.params.id;
+        let body = req.body;
+        if(partialUpdateAlumno(id,body)){
+            res.send();
+        } else{
+            res.status(400).send({error:"Faltan datos o id incorrecto"})
+        }
+    })
+    .delete((req, res)=>{
+        let id = req.params.id;
+        let pos = alumnos.findIndex(al => al.id == id);
+        if(pos==-1){
+            res.status(404).send({informacion: "Id no existe"});
+            return;
+        }
+
+        let borrado = alumnos.splice(pos,1);
+        fs.writeFileSync('alumnos.json',JSON.stringify(alumnos));
+        res.send(borrado);
+
 
     })
 
@@ -87,8 +108,30 @@ function updateAlumno(id, alumno){
     if (alumno.id && alumno.nombre && alumno.edad && id == alumno.id) {
         Object.assign(alumnos[pos],alumno);
         fs.writeFileSync('alumnos.json', JSON.stringify(alumnos));
-        res.send(alumnos[pos]);
+        return true;
+    }
+    return false;
+}
+
+function partialUpdateAlumno(id, alumno){
+    let pos = alumnos.findIndex(al => al.id == id);
+        
+    alumnos[pos].nombre = (alumno.nombre)? alumno.nombre: alumnos[pos].nombre;    
+    alumnos[pos].edad = (alumno.edad)? alumno.edad: alumnos[pos].edad;
+
+    Object.assign(alumnos[pos],alumno);
+    fs.writeFileSync('alumnos.json', JSON.stringify(alumnos));
+    return true;
+ 
+}
+
+function validarId(req,res, next){
+    console.log("hola");
+    let id = req.params.id;
+    let pos = alumnos.findIndex(al => al.id == id);
+    if(pos==-1){
+        res.status(404).send({error:"Id no existe"});
         return;
     }
-
+    next();
 }
