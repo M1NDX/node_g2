@@ -4,6 +4,9 @@ const fs = require('fs');
 const chalk = require('chalk');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+let {Alumno} = require('./mongodb/mongodb-connect')
+//import {Alumno} from './mongodb/mongodb-connect'
+
 
 //npm i body-parser --save
 const app = express()
@@ -26,30 +29,43 @@ app.get('/', (req, res) => res.send('Hello DASWorld!'))
 //app.route('/home').get((req, res) => res.send('DASWorld HOME1'))
 app.route('/api/alumno')
     .get((req, res) => {
-        if (req.query.edad) {
-            console.log(chalk.bold.blue(req.query.edad))
-            let alumnosFiltro = alumnos.filter(al => al.edad >= Number(req.query.edad))
-            res.json(alumnosFiltro);
-        } else {
-            res.json(alumnos);
-        }
+        // if (req.query.edad) {
+        //     console.log(chalk.bold.blue(req.query.edad))
+        //     let alumnosFiltro = alumnos.filter(al => al.edad >= Number(req.query.edad))
+        //     res.json(alumnosFiltro);
+        // } else {
+        //     res.json(alumnos);
+        // }
+        Alumno.find({},{_id:0,nombre:1, edad:1},(err,docs)=>{
+            if(err){
+                console.log(err);
+                res.status(400).send();
+            }else{
+                res.json(docs);
+            }
+        })
     })
     .post((req, res) => {
         let body = req.body;
-
-        if (body.id && body.nombre && body.edad) {
-            //TODO: ver que no exista id 
-            alumnos.push(body);
-            fs.writeFileSync('alumnos.json', JSON.stringify(alumnos));
-            console.log(chalk.blue.bold(JSON.stringify(req.body)));
-            console.log(req.body.nombre);
-            res.status(201).send(body);
-            return;
+        console.log(chalk.blue.bold(JSON.stringify(req.body)));
+        if (body.carrera && body.nombre && body.edad && body.calificacion) {
+   
+            let newAlumno = new Alumno(body);
+            newAlumno.save((err,doc)=>{
+                if(doc){
+                    console.log(doc);
+                    res.status(201).json(doc);
+                }else{
+                    res.status(400).send();
+                }
+            })
+        }else{
+            res.status(400).send({
+                error: " Faltan atributos en el body"
+            })
         }
 
-        res.status(400).send({
-            error: " Faltan atributos en el body"
-        })
+       
 
     })
 
