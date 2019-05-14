@@ -1,6 +1,7 @@
 let {
     mongoose
 } = require('./mongodb-connect')
+let jwt = require('jsonwebtoken');
 
 let userSchema = mongoose.Schema({
     email: {
@@ -39,12 +40,14 @@ userSchema.methods.generateToken = function () {
 }
 
 userSchema.statics.validarUsuario =  function (email, password) {
-    
+    let User = this;
+    console.log(email + " "+ password);
     return new Promise((resolve, reject) => {
         User.findOne({
-            email, password
+            email: email, password:password
         }).then((user) => {
             if (user) {
+                console.log(user);
                 let newToken = user.generateToken();
                 User.updateOne({email:email},{token:newToken}).then((doc)=>{
                     resolve(newToken)
@@ -56,12 +59,45 @@ userSchema.statics.validarUsuario =  function (email, password) {
                 reject({error:"no existe email"})
             }
         }).catch((err) => {
+            console.log(err);
             reject({error:"no se encontró"})
         })
     })
 
+}
 
+userSchema.statics.verificarToken = function (token) {
+    let User = this; 
+    let usr = jwt.decode(token);
+    console.log(usr);
+    
+    return new Promise( (resolve,reject)=> {
+        User.findById(usr._id).then((user)=>{
+            if(token == user.token){
+                jwt.verify(token, 'claveSecreta', (err, decoded) => {
+                    if (err) {
+                        if (err.name == "TokenExpiredError") {
+                            console.log("token expirado");
+                        } else {
+                            console.log("error al verificar token");
+                        }
+                        return reject(err);
+                    }else{
+                        return resolve(decoded);
+                    }
+                })
+            }else{
+                return reject({error: "token no es igual al de la base de datos"});
+            }
+            
+        })
 
+    })
+         
+}
+
+userSchema.statics.verDatosToken = function(token){
+    return jwt.decode(token);
 }
 
 

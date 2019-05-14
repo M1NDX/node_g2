@@ -5,7 +5,7 @@ const chalk = require('chalk');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 let {Alumno} = require('./mongodb/Alumno');
-let {User} = require(./mongodb/User);
+let {User} = require('./mongodb/User');
 //import {Alumno} from './mongodb/mongodb-connect'
 //let {User} = require('./mongodb/User')
 
@@ -27,10 +27,29 @@ app.use('/api/alumno/:id',validarId);
 
 app.use(express.static(__dirname + '/public'))
 
-app.get('/', (req, res) => res.send('Hello DASWorld!'))
+//app.get('/', (req, res) => res.send('Hello DASWorld!'))
 //app.route('/home').get((req, res) => res.send('DASWorld HOME1'))
+
+function autenticar(req,res, next){
+    let token = req.get('x-auth');
+    if(!token){
+        res.status(401).send({error: "no hay token"});
+        return;
+    }
+
+    User.verificarToken(token).then((user)=>{
+        console.log("Token verificado ...");
+        req.userid = user._id;
+        next();
+    }).catch((err)=>{
+        res.status(401).send(err);
+    });
+
+}
+
+
 app.route('/api/alumno')
-    .get((req, res) => {
+    .get(autenticar, (req, res) => {  //AQUI SE USA EL MIDDLEWARE DE AUTENTICAR *****
         // if (req.query.edad) {
         //     console.log(chalk.bold.blue(req.query.edad))
         //     let alumnosFiltro = alumnos.filter(al => al.edad >= Number(req.query.edad))
@@ -138,6 +157,30 @@ app.route('/api/alumno/:id')
         }
 
     })   
+
+app.route('/api/user/logout')    
+    .get((req, res)=>{
+       let token = req.get('x-auth');
+       if(!token){
+           console.log("no existe token");
+           res.status(400).send({error: "falta header con token"})
+           return;
+       }    
+
+       // * SE ASUME QUE SI HAY TOKEN
+       let datosUsuario = User.verDatosToken(token);
+       console.log(datosUsuario);
+       if(datosUsuario && datosUsuario._id){
+           
+           User.updateOne({_id:datosUsuario._id},{token: "123"}).then((doc)=>{
+              res.send(doc);
+           }).catch((err)=>{
+               console.log(err);
+               res.status(404).send();
+           })
+       }
+    })
+
 
 app.listen(port, () => console.log(`Example app listening on port http://127.0.0.1:${port}!`))
 
