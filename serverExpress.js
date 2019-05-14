@@ -4,8 +4,10 @@ const fs = require('fs');
 const chalk = require('chalk');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-let {Alumno} = require('./mongodb/mongodb-connect')
+let {Alumno} = require('./mongodb/Alumno');
+let {User} = require(./mongodb/User);
 //import {Alumno} from './mongodb/mongodb-connect'
+//let {User} = require('./mongodb/User')
 
 
 //npm i body-parser --save
@@ -115,6 +117,27 @@ app.route('/api/alumno/:id')
 
     })
 
+
+ app.route('/api/user/login')
+    .post( async (req,res)=>{
+        console.log(req.body);
+        let body = req.body;
+        if(body.email && body.password){
+            try{
+                let token = await User.validarUsuario(body.email, body.password);
+                res.set('x-auth',token);
+                res.send();
+                
+            } catch(err){
+                console.log(err);
+                res.status(400).send(err);
+            }
+            
+        }else{
+            res.status(400).send({error:"falta email o password"})
+        }
+
+    })   
 
 app.listen(port, () => console.log(`Example app listening on port http://127.0.0.1:${port}!`))
 
