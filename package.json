@@ -7,7 +7,7 @@
     "start": "nodemon serverExpress.js",
     "nd": "node serverExpress.js",
     "ndm": "nodemon serverExpress.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no tests specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
